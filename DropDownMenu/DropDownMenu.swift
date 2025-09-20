@@ -1,22 +1,59 @@
 //
-//  DropdownMenu.swift
-//  Expense Ninja
+//  DropDownMenu.swift
+//  DropDownMenu
 //
 //  Created by Sheraz Ahmed on 25/12/2024.
 //
 
-
-
 import SwiftUI
 
+// MARK: - DropDownItem Model
+/// Represents an item in the dropdown menu
+struct DropDownItem: Identifiable {
+    let id: Int
+    let title: String
+    let onSelect: () -> Void
+    
+    /// Initialize a dropdown item
+    /// - Parameters:
+    ///   - id: Unique identifier for the item
+    ///   - title: Display text for the item
+    ///   - onSelect: Closure to execute when item is selected
+    init(id: Int, title: String, onSelect: @escaping () -> Void = {}) {
+        self.id = id
+        self.title = title
+        self.onSelect = onSelect
+    }
+}
+
+// MARK: - Sample Data
+/// Sample data for previews and testing
+extension DropDownItem {
+    static let dummyItems: [DropDownItem] = [
+        .init(id: 1, title: "Option 1"),
+        .init(id: 2, title: "Option 2")
+    ]
+    
+    static let frameworkList: [DropDownItem] = [
+        .init(id: 1, title: "SwiftUI", onSelect: { print("SwiftUI selected") }),
+        .init(id: 2, title: "UIKit", onSelect: { print("UIKit selected") })
+    ]
+    
+    static let IDEList: [DropDownItem] = [
+        .init(id: 1, title: "Xcode", onSelect: { print("Xcode selected") }),
+        .init(id: 2, title: "Visual Studio Code", onSelect: { print("Visual Studio Code selected") })
+    ]
+}
+
+// MARK: - DropDownMenu Component
+/// A customizable dropdown menu component for SwiftUI
 struct DropDownMenu: View {
     @State private var isSelecting = false
-
     @Binding var selectedItem: DropDownItem?
 
     let items: [DropDownItem]
     let placeholder: String
-    var menuLabel: String
+    let menuLabel: String
 
     var body: some View {
         VStack(alignment: .leading, spacing: 5) {
@@ -50,7 +87,7 @@ struct DropDownMenu: View {
 
                             VStack(spacing: 5) {
                                 ForEach(items) { item in
-                                    DropdownMenuItemView(
+                                    DropDownMenuItemView(
                                         isSelecting: $isSelecting,
                                         selectedItem: $selectedItem,
                                         item: item
@@ -78,7 +115,8 @@ struct DropDownMenu: View {
 }
 
 
-struct DropdownMenuItemView: View {
+/// Individual item view within the dropdown menu
+struct DropDownMenuItemView: View {
     @Binding var isSelecting: Bool
     @Binding var selectedItem: DropDownItem?
 
@@ -108,23 +146,68 @@ struct DropdownMenuItemView: View {
     }
 }
 
-
-struct CustomDropdownMenu_Previews: PreviewProvider {
-    static var previews: some View {
-        PreviewWrapper()
-            .padding(.horizontal)
+// MARK: - DropDownMenuItemView Preview
+#Preview("DropDownMenuItemView") {
+    @Previewable @State var isSelecting = true
+    @Previewable @State var selectedItem: DropDownItem? = DropDownItem.dummyItems.first
+    
+    return VStack(spacing: 10) {
+        DropDownMenuItemView(
+            isSelecting: $isSelecting,
+            selectedItem: $selectedItem,
+            item: DropDownItem.dummyItems[0]
+        )
+        
+        DropDownMenuItemView(
+            isSelecting: $isSelecting,
+            selectedItem: $selectedItem,
+            item: DropDownItem.dummyItems[1]
+        )
     }
+    .padding()
+}
 
-    struct PreviewWrapper: View {
-        @State private var selectedItem: DropDownItem? = nil
+// MARK: - DropDownMenuView (Demo View)
+struct DropDownMenuView: View {
+    @State private var selectedFramework: DropDownItem? = nil
+    @State private var selectedIDE: DropDownItem? = nil
 
-        var body: some View {
+    var body: some View {
+        VStack(spacing: 20) {
             DropDownMenu(
-                selectedItem: $selectedItem,
-                items: dummyItems,
+                selectedItem: $selectedFramework,
+                items: DropDownItem.frameworkList,
                 placeholder: "Select",
-                menuLabel: "Dropdown Label"
+                menuLabel: "Framework"
             )
+
+            DropDownMenu(
+                selectedItem: $selectedIDE,
+                items: DropDownItem.IDEList,
+                placeholder: "Select",
+                menuLabel: "IDE"
+            )
+
+            Spacer()
         }
+        .padding()
     }
+}
+
+// MARK: - Main Preview
+#Preview {
+    @Previewable @State var selectedItem: DropDownItem? = nil
+    
+    return DropDownMenu(
+        selectedItem: $selectedItem,
+        items: DropDownItem.dummyItems,
+        placeholder: "Select",
+        menuLabel: "Dropdown Label"
+    )
+    .padding(.horizontal)
+}
+
+// MARK: - DropDownMenuView Preview
+#Preview("DropDownMenuView") {
+    DropDownMenuView()
 }
